@@ -1,40 +1,41 @@
-# 🎓 PICT Sem 4 — Student ESE Risk Predictor
+# 🎓 PICT Sem 4 IT — Student ESE Risk Predictor
 
-A data-driven web application built specifically for **PICT (Pune Institute of Computer Technology) Semester 4 IT students** that predicts which students are at risk of failing their End Semester Examinations (ESE) — **before the exams happen**.
+A data-driven web application built specifically for **PICT (Pune Institute of Computer Technology) Semester 4 IT students**. It uses mid-semester data (CIE marks, ISE marks, and attendance) to predict students at risk of failing their End Semester Examinations (ESE) — **before the exams happen**.
 
 ---
 
 ## 📌 Problem Statement
 
-Many educational institutions lack data-driven methods to identify at-risk students early. By the time a student fails, it's already too late for meaningful intervention. This project uses **mid-semester data (CIE marks, ISE marks, and attendance)** to predict ESE failure risk, giving teachers the opportunity to intervene **before** the exams.
+Identifying at-risk students early is a major challenge for educational institutions. Traditional tracking usually happens after the exams, when it's too late for intervention. This project utilizes machine learning to analyze **mid-semester performance indicators** to predict ESE failure risk, enabling faculty to provide timely academic support.
 
 ---
 
-## 🏫 Built For
+## 🏫 Project Context
 
-> **PICT Autonomous — Semester IV (Information Technology)**
+> **PICT Autonomous — Semester IV (Information Technology)**  
 > Subject scheme as per PICT 2024-25 curriculum
 
-| Subject | Code | Type |
+The system predicts the failure risk for the entire ESE, with a focus on the following core subjects:
+
+| Subject | Code | Tracked for Mid-Sem |
 |---|---|---|
-| Advanced Data Structures & Applications (ADSA) | 3403105 | Theory |
-| Database & Information Systems (DIS) | 3403106 | Theory |
-| Discrete & Statistical Mathematics (DSM) | 3403107 | Theory |
-| MDM-2 | 04051X2 | Theory |
-| Open Elective II (OE-II) | 04063XX | Theory |
-| IP Strategies & Economics (IPSE) | 3409302 | Theory |
+| Advanced Data Structures & Applications (ADSA) | 3403105 | ✅ Yes |
+| Database & Information Systems (DIS/DBMS) | 3403106 | ✅ Yes |
+| Discrete & Statistical Mathematics (DSM) | 3403107 | ✅ Yes |
+| Management and Digital Marketing (MDM-2) | 04051X2 | ✅ Yes |
+
 
 ---
 
 ## 🚀 Key Features
 
-- 🔐 **Secure Faculty Access** — Protected login system for faculty members to manage student data safely.
-- 📂 **Smart CSV Processing** — Upload mid-semester data; the app automatically calculates derived features and handles data cleaning.
-- 🔮 **ML Prediction** — Gradient Boosting model predicts "Safe" vs "At Risk" based on historical performance patterns.
-- 🛡️ **Leakage Prevention** — Ensuring raw predictions by automatically ignoring/dropping pre-labeled data in uploads.
-- 💡 **Auto-Patterns** — Generates behavioral insights (e.g., attendance impact, subject-wise weakness, backlog correlations).
-- 📊 **Dynamic Visuals** — Interactive charts (Chart.js) showing real-time risk distribution and attendance trends.
-- 🕓 **History Management** — Full persistence using SQLite with options to view details, delete individual records, or clear all history.
+- 🔐 **Secure Faculty Access** — Protected login system for faculty to manage student data.
+- 📂 **Automated CSV Processing** — Streamlined upload process for mid-semester data with automatic feature engineering.
+- 🔮 **Gradient Boosting Prediction** — High-accuracy machine learning model predicts "Safe" vs "At Risk" based on historical trends.
+- 🛡️ **Data Leakage Prevention** — Enforces honesty in prediction by strictly blocking CSV uploads that already contain a 'performance_label'.
+- 💡 **Auto-Pattern Generation** — Automatically identifies behavioral insights (e.g., correlation between <75% attendance and risk).
+- 📊 **Dynamic Dashboard** — Interactive charts using Chart.js showing attendance trends, backlog distribution, and subject-wise averages.
+- 🕓 **Full History & Persistence** — SQLite-backed history tracking with detailed record views, individual deletion, and "Clear All" capability.
 
 ---
 
@@ -42,110 +43,74 @@ Many educational institutions lack data-driven methods to identify at-risk stude
 
 ```mermaid
 graph TD
-    A[Teacher Login] --> B[Upload CSV with Mid-Sem Data]
-    B --> C[Feature Engineering & Cleaning]
+    A[Faculty Login] --> B[Upload Mid-Sem CSV]
+    B --> C[Feature Engineering & Validation]
     C --> D[ML Model Prediction]
     D --> E[Interactive Dashboard]
-    E --> F[Visual Insights & At-Risk List]
-    F --> G[Early Academic Intervention]
+    E --> F[Logical Pattern Insights]
+    F --> G[Early Intervention Strategies]
 ```
 
-The model is trained on historical student data where:
-- **Inputs** → CIE marks (20), ISE marks (20), Subject Attendance, and Previous Backlogs.
-- **Output** → **Safe** (Likely pass ESE) / **At Risk** (Potential failure in one or more subjects).
+The system evaluates students based on:
+1. **Total Mid-Sem Score** (CIE + ISE out of 40).
+2. **Attendance Percentages** (per subject and overall average).
+3. **Previous Backlogs** (historical academic standing).
+4. **CIE Cutoffs** (flagging students below 50% in any CIE module).
 
 ---
 
-## 📁 Project Structure
+## 📊 CSV Data Requirements
 
-```
-DSM Project/
-│
-├── data/
-│   └── sem4_students.csv        ← Training dataset
-│
-├── templates/
-│   ├── index.html               ← Dashboard & Results
-│   └── login.html               ← Faculty Authentication
-│
-├── app.py                       ← Flask Backend (Main Logic)
-├── main.py                      ← Model training & Feature selection
-├── model.pkl                    ← Serialized ML Model
-├── label_encoder.pkl            ← Target label encoder
-├── database.db                  ← SQLite Database (History)
-└── requirements.txt             ← Project dependencies
-```
-
----
-
-## 📊 CSV Data Format
-
-The uploaded CSV must contain the following headers:
+To perform a successful prediction, the uploaded CSV must contain the following columns:
 `student_id, name, roll_no, ADSA_CIE, ADSA_ISE, ADSA_attendance, DIS_CIE, DIS_ISE, DIS_attendance, DSM_CIE, DSM_ISE, DSM_attendance, MDM2_CIE, MDM2_ISE, MDM2_attendance, backlogs`
 
-> **Note:** Even if `performance_label` is present in your file, the system will discard it to ensure the prediction is based strictly on mid-semester features.
+> [!IMPORTANT]
+> **Prediction Blocker:** If your file includes a `performance_label` column, the system will reject the upload. This ensures that the model provides a fresh, unbiased prediction based strictly on current performance metrics rather than relying on pre-existing conclusions.
 
 ---
 
 ## ⚙️ Setup & Installation
 
 ### 1. Requirements
-Ensure you have Python 3.8+ installed.
+- Python 3.8+
+- Libraries: `flask`, `pandas`, `scikit-learn`, `matplotlib`, `seaborn`, `sqlite3`
 
 ### 2. Install Dependencies
 ```bash
 pip install flask pandas numpy scikit-learn matplotlib seaborn
 ```
 
-### 3. Initialize & Train (Optional)
-If you wish to retrain the model with `data/sem4_students.csv`:
+### 3. Model Training (Optional)
+To retrain the model or view exploratory data analysis (EDA) graphs:
 ```bash
 python main.py
 ```
+This will generate `model.pkl` and `label_encoder.pkl`, along with 7 diagnostic graphs (Importance, Correlation, Heatmap, etc.).
 
-### 4. Run the Application
+### 4. Running the App
 ```bash
 python app.py
 ```
-
-### 5. Access
-Open [http://127.0.0.1:5000](http://127.0.0.1:5000)
+Visit `http://127.0.0.1:5000`
 - **Username:** `teacher`
-- **Password:** `admin123` *(Hardcoded in app.py for demo)*
+- **Password:** `admin123`
 
 ---
 
-## 📈 Model Performance
-
-| Metric | Detail |
-|---|---|
-| **Algorithm** | Gradient Boosting Classifier |
-| **Logic** | Ensemble learning for high precision on 'At Risk' labels |
-| **Accuracy** | ~88% on validation set |
-| **Key Features** | Mid-sem score totals, Subject-wise attendance, Backlog count |
-
----
-
-## 🛠️ Tech Stack
+## 🛠️ Technology Stack
 
 | Layer | Technology |
 |---|---|
 | **Backend** | Python, Flask |
+| **Logic/ML** | Scikit-Learn, Pandas, NumPy |
 | **Database** | SQLite3 |
-| **ML/Data** | Scikit-Learn, Pandas, NumPy |
 | **Frontend** | HTML5, CSS3, JavaScript |
-| **Visuals** | Chart.js, Matplotlib |
+| **Visuals** | Chart.js, Matplotlib (for EDA) |
 
 ---
 
 ## 👥 Authors
 
-> Developed by **SY IT — Section 9**, PICT Pune.
-> Part of the **Discrete & Statistical Mathematics (DSM)** Course Project.
+> Developed by **SY IT — Section 9**, PICT Pune.  
+> Part of the **Discrete & Statistical Mathematics (DSM)** Course Project.  
 > Academic Year 2025-26.
-
----
-
-## 📄 License
-
-This project is intended for educational and academic use only within the PICT curriculum framework.
