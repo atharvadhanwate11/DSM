@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student ESE Risk Predictor</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+        }
+        
+        header {
+            background: #1e293b;
+            color: white;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        header h1 {
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+        
+        header p {
+            color: #94a3b8;
+            font-size: 0.8rem;
+            margin-top: 3px;
+        }
+        
+        .tab-btn {
+            background: transparent;
+            color: #94a3b8;
+            border: 1px solid #334155;
+            padding: 8px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+        
+        .tab-btn.active,
+        .tab-btn:hover {
+            background: #38bdf8;
+            color: #0f172a;
+            border-color: #38bdf8;
+        }
+        
+        .main {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        .page {
+            display: none;
+        }
+        
+        .page.active {
+            display: block;
+        }
+        
+        .upload-box {
+            background: white;
+            border: 2px dashed #cbd5e1;
+            border-radius: 12px;
+            padding: 48px;
+            text-align: center;
+            margin-bottom: 32px;
+            transition: border-color 0.2s;
+        }
+        
+        .upload-box:hover {
+            border-color: #3b82f6;
+        }
+        
+        .upload-box h2 {
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+        }
+        
+        .upload-box p {
+            color: #64748b;
+            font-size: 0.85rem;
+            margin-bottom: 20px;
+        }
+        
+        .upload-btn {
+            display: inline-block;
+            background: #1e293b;
+            color: white;
+            padding: 12px 28px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+        
+        .upload-btn:hover {
+            background: #334155;
+        }
+        
+        #csv_file {
+            display: none;
+        }
+        
+        .summary-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+        
+        .summary-card {
+            background: white;
+            border-radius: 10px;
+            padding: 24px;
+            border-left: 4px solid;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+            text-align: center;
+        }
+        
+        .summary-card .count {
+            font-size: 3rem;
+            font-weight: 800;
+        }
+        
+        .summary-card .label {
+            font-size: 0.85rem;
+            color: #64748b;
+            margin-top: 4px;
+        }
+        
+        .safe {
+            border-color: #22c55e;
+        }
+        
+        .safe .count {
+            color: #22c55e;
+        }
+        
+        .at-risk {
+            border-color: #ef4444;
+        }
+        
+        .at-risk .count {
+            color: #ef4444;
+        }
+        
+        .section-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .patterns-box {
+            background: white;
+            border-radius: 10px;
+            padding: 24px;
+            margin-bottom: 32px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+        }
+        
+        .pattern-item {
+            padding: 10px 0;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 0.92rem;
+            color: #334155;
+            line-height: 1.6;
+        }
+        
+        .pattern-item:last-child {
+            border-bottom: none;
+        }
+        
+        .graphs-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+        
+        .graph-box {
+            background: white;
+            border-radius: 10px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+        }
+        
+        .table-box {
+            background: white;
+            border-radius: 10px;
+            padding: 24px;
+            margin-bottom: 32px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.88rem;
+        }
+        
+        th {
+            background: #f8fafc;
+            padding: 10px 14px;
+            text-align: left;
+            font-weight: 600;
+            color: #64748b;
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        td {
+            padding: 10px 14px;
+            border-bottom: 1px solid #f1f5f9;
+            color: #334155;
+        }
+        
+        tr:last-child td {
+            border-bottom: none;
+        }
+        
+        tr:hover td {
+            background: #f8fafc;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.78rem;
+            font-weight: 600;
+        }
+        
+        .badge-safe {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+        
+        .badge-atrisk {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+        
+        .subj-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+        
+        .subj-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+        }
+        
+        .subj-name {
+            font-size: 0.8rem;
+            color: #64748b;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        .subj-score {
+            font-size: 1.8rem;
+            font-weight: 800;
+        }
+        
+        .subj-max {
+            font-size: 0.75rem;
+            color: #94a3b8;
+        }
+        
+        .subj-bar {
+            height: 6px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+        
+        .subj-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s;
+        }
+        
+        .history-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px 24px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            border-left: 4px solid #e2e8f0;
+            transition: all 0.2s;
+        }
+        
+        .history-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-left-color: #3b82f6;
+        }
+        
+        .history-card h3 {
+            font-size: 0.95rem;
+            font-weight: 700;
+        }
+        
+        .history-card p {
+            font-size: 0.8rem;
+            color: #64748b;
+            margin-top: 3px;
+        }
+        
+        .hc-right {
+            display: flex;
+            gap: 24px;
+        }
+        
+        .mini-stat .n {
+            font-size: 1.5rem;
+            font-weight: 800;
+        }
+        
+        .mini-stat .l {
+            font-size: 0.7rem;
+            color: #64748b;
+        }
+        
+        .empty {
+            text-align: center;
+            padding: 60px;
+            color: #94a3b8;
+        }
+        
+        #dashboard {
+            display: none;
+        }
+        
+        #history-detail {
+            display: none;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #64748b;
+            display: none;
+        }
+        
+        .error-box {
+            background: #fee2e2;
+            color: #dc2626;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .back-btn {
+            background: #f1f5f9;
+            color: #1e293b;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            margin-bottom: 24px;
+            font-weight: 600;
+        }
+        
+        .back-btn:hover {
+            background: #e2e8f0;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <div>
+            <h1>🎓 Student ESE Risk Predictor</h1>
+            <p>Semester IV — Predict ESE failure risk using mid-semester data</p>
+        </div>
+        <div style="display:flex;gap:12px;align-items:center;">
+            <button class="tab-btn active" onclick="showPage('predict-page',this)">📂 Upload & Predict</button>
+            <button class="tab-btn" onclick="showPage('history-page',this);loadHistory()">🕓 Upload History</button>
+            <a href="/logout" class="tab-btn" style="background:#ef4444;border-color:#ef4444;color:white;text-decoration:none;">Logout</a>
+        </div>
+    </header>
+
+    <div class="main">
+
+        <!-- PREDICT PAGE -->
+        <div class="page active" id="predict-page">
+            <div class="upload-box">
+                <h2>Upload Mid-Semester Student Data</h2>
+                <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 8px;"></p>
+                <p style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 20px;">The model will predict the performance labels from scratch using your input features.</p>
+                <label class="upload-btn" for="csv_file">📂 Choose Data CSV</label>
+                <input type="file" id="csv_file" accept=".csv" onchange="uploadFile()">
+                <p id="file-name" style="margin-top:12px;color:#3b82f6;font-size:0.85rem;"></p>
+            </div>
+
+            <div class="error-box" id="error-box"></div>
+            <div class="loading" id="loading">⏳ Analyzing mid-semester data...</div>
+
+            <div id="dashboard">
+                <div class="summary-grid">
+                    <div class="summary-card safe">
+                        <div class="count" id="count-safe">0</div>
+                        <div class="label">✅ Safe — Likely to pass all ESE</div>
+                    </div>
+                    <div class="summary-card at-risk">
+                        <div class="count" id="count-atrisk">0</div>
+                        <div class="label">🚨 At Risk — May fail one or more ESE</div>
+                    </div>
+                </div>
+
+                <div class="section-title">📘 Subject-wise Mid-Sem Averages (CIE + ISE out of 40)</div>
+                <div class="subj-grid" id="subj-grid"></div>
+
+                <div class="patterns-box">
+                    <div class="section-title">💡 Key Patterns Found</div>
+                    <div id="patterns-list"></div>
+                </div>
+
+                <div class="graphs-grid">
+                    <div class="graph-box">
+                        <div class="section-title">📉 Attendance Range vs At-Risk Rate</div>
+                        <canvas id="attChart"></canvas>
+                    </div>
+                    <div class="graph-box">
+                        <div class="section-title">📚 Backlogs vs At-Risk Rate</div>
+                        <canvas id="backlogChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="table-box">
+                    <div class="section-title">🚨 At-Risk Students — Need Immediate Attention</div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Avg Attendance</th>
+                                <th>Backlogs</th>
+                                <th>ADSA Mid</th>
+                                <th>DIS Mid</th>
+                                <th>DSM Mid</th>
+                                <th>MDM2 Mid</th>
+                                <th>Prediction</th>
+                            </tr>
+                        </thead>
+                        <tbody id="at-risk-body"></tbody>
+                    </table>
+                </div>
+
+                <div class="table-box">
+                    <div class="section-title">📋 All Students</div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Avg Attendance</th>
+                                <th>Backlogs</th>
+                                <th>ADSA Mid</th>
+                                <th>DIS Mid</th>
+                                <th>DSM Mid</th>
+                                <th>MDM2 Mid</th>
+                                <th>Prediction</th>
+                            </tr>
+                        </thead>
+                        <tbody id="all-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- HISTORY PAGE -->
+        <div class="page" id="history-page">
+            <div class="back-btn-container" style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <div class="section-title" id="history-title" style="margin-bottom:0; border:none;">🕓 Upload History</div>
+                <button class="tab-btn" style="background:#fee2e2; color:#dc2626; border-color:#fecaca;" onclick="deleteAll()">🗑️ Delete All History</button>
+            </div>
+            <div id="history-list"></div>
+            <div id="history-detail">
+                <button class="back-btn" onclick="closeDetail()">← Back to History</button>
+                <div class="summary-grid">
+                    <div class="summary-card safe">
+                        <div class="count" id="hd-safe">0</div>
+                        <div class="label">✅ Safe</div>
+                    </div>
+                    <div class="summary-card at-risk">
+                        <div class="count" id="hd-atrisk">0</div>
+                        <div class="label">🚨 At Risk</div>
+                    </div>
+                </div>
+                <div class="patterns-box">
+                    <div class="section-title">💡 Patterns from this Upload</div>
+                    <div id="hd-patterns"></div>
+                </div>
+                <div class="table-box">
+                    <div class="section-title">🚨 At-Risk Students</div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Avg Attendance</th>
+                                <th>Backlogs</th>
+                                <th>ADSA Mid</th>
+                                <th>DIS Mid</th>
+                                <th>DSM Mid</th>
+                                <th>MDM2 Mid</th>
+                                <th>Prediction</th>
+                            </tr>
+                        </thead>
+                        <tbody id="hd-at-risk-body"></tbody>
+                    </table>
+                </div>
+                <div class="table-box">
+                    <div class="section-title">📋 All Students</div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Avg Attendance</th>
+                                <th>Backlogs</th>
+                                <th>ADSA Mid</th>
+                                <th>DIS Mid</th>
+                                <th>DSM Mid</th>
+                                <th>MDM2 Mid</th>
+                                <th>Prediction</th>
+                            </tr>
+                        </thead>
+                        <tbody id="hd-all-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let attChart = null,
+            backlogChart = null;
+
+        function showPage(id, btn) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            btn.classList.add('active');
+        }
+
+        function getBadge(pred) {
+            return pred === 'Safe' ?
+                '<span class="badge badge-safe">✅ Safe</span>' :
+                '<span class="badge badge-atrisk">🚨 At Risk</span>';
+        }
+
+        function renderTable(bodyId, students) {
+            const tbody = document.getElementById(bodyId);
+            tbody.innerHTML = '';
+            if (!students.length) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#94a3b8;">No students found</td></tr>';
+                return;
+            }
+            students.forEach(s => {
+                tbody.innerHTML += `<tr>
+                <td><strong>${s.name}</strong></td>
+                <td>${s.avg_attendance}%</td>
+                <td>${s.backlogs}</td>
+                <td>${s.ADSA_midsem}/40</td>
+                <td>${s.DIS_midsem}/40</td>
+                <td>${s.DSM_midsem}/40</td>
+                <td>${s.MDM2_midsem}/40</td>
+                <td>${getBadge(s.predicted_performance)}</td>
+            </tr>`;
+            });
+        }
+
+        function renderSubjectAvgs(avgs) {
+            const grid = document.getElementById('subj-grid');
+            grid.innerHTML = '';
+            for (const [subj, avg] of Object.entries(avgs)) {
+                const pct = (avg / 40 * 100).toFixed(0);
+                const color = pct >= 60 ? '#22c55e' : pct >= 40 ? '#f59e0b' : '#ef4444';
+                grid.innerHTML += `<div class="subj-card">
+                <div class="subj-name">${subj}</div>
+                <div class="subj-score" style="color:${color}">${avg}</div>
+                <div class="subj-max">out of 40</div>
+                <div class="subj-bar"><div class="subj-fill" style="width:${pct}%;background:${color}"></div></div>
+            </div>`;
+            }
+        }
+
+        async function uploadFile() {
+            const file = document.getElementById('csv_file').files[0];
+            if (!file) return;
+            document.getElementById('file-name').textContent = '📄 ' + file.name;
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('dashboard').style.display = 'none';
+            document.getElementById('error-box').style.display = 'none';
+
+            const fd = new FormData();
+            fd.append('csv_file', file);
+            const res = await fetch('/upload', {
+                method: 'POST',
+                body: fd
+            });
+            const data = await res.json();
+            document.getElementById('loading').style.display = 'none';
+
+            if (data.error) {
+                const eb = document.getElementById('error-box');
+                eb.textContent = '❌ ' + data.error;
+                eb.style.display = 'block';
+                return;
+            }
+            renderDashboard(data);
+        }
+
+        function renderDashboard(data) {
+            document.getElementById('count-safe').textContent = data.summary['Safe'] || 0;
+            document.getElementById('count-atrisk').textContent = data.summary['At Risk'] || 0;
+            renderSubjectAvgs(data.subject_avgs);
+            document.getElementById('patterns-list').innerHTML = data.patterns.map(p => `<div class="pattern-item">${p}</div>`).join('');
+
+            if (attChart) attChart.destroy();
+            if (backlogChart) backlogChart.destroy();
+
+            attChart = new Chart(document.getElementById('attChart'), {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(data.att_graph),
+                    datasets: [{
+                        label: 'At Risk Rate (%)',
+                        data: Object.values(data.att_graph),
+                        backgroundColor: '#ef4444',
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+            backlogChart = new Chart(document.getElementById('backlogChart'), {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(data.backlog_graph),
+                    datasets: [{
+                        label: 'At Risk Rate (%)',
+                        data: Object.values(data.backlog_graph),
+                        backgroundColor: '#f59e0b',
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+
+            renderTable('at-risk-body', data.at_risk);
+            renderTable('all-body', data.students);
+            document.getElementById('dashboard').style.display = 'block';
+            document.getElementById('dashboard').scrollIntoView({
+                behavior: 'smooth'
+            });
+        }
+
+        async function loadHistory() {
+            const res = await fetch('/history');
+            const data = await res.json();
+            const list = document.getElementById('history-list');
+            document.getElementById('history-detail').style.display = 'none';
+
+            if (!data.uploads.length) {
+                list.innerHTML = `<div class="empty"><p style="font-size:2rem">📭</p><p style="margin-top:12px">No uploads yet!</p></div>`;
+                return;
+            }
+            
+            list.innerHTML = '';
+            data.uploads.forEach(u => {
+                list.innerHTML += `<div class="history-card" onclick="loadDetail(${u.id})">
+                <div><h3>📄 ${u.filename}</h3><p>${u.date} · ${u.total} students</p></div>
+                <div class="hc-right">
+                    <div class="mini-stat"><div class="n" style="color:#22c55e">${u.safe_count}</div><div class="l">Safe</div></div>
+                    <div class="mini-stat"><div class="n" style="color:#ef4444">${u.at_risk_count}</div><div class="l">At Risk</div></div>
+                    <button class="tab-btn" style="padding: 6px; background:#f1f5f9; min-width:32px;" onclick="event.stopPropagation(); deleteRecord(${u.id})">🗑️</button>
+                </div>
+            </div>`;
+            });
+        }
+
+        async function deleteRecord(uploadId) {
+            if (!confirm("Are you sure you want to delete this record? This cannot be undone.")) return;
+            try {
+                const res = await fetch(`/history/delete/${uploadId}`, { method: 'DELETE' });
+                const data = await res.json();
+                if (data.success) {
+                    loadHistory();
+                } else {
+                    alert("Error: " + data.error);
+                }
+            } catch (err) {
+                alert("Failed to delete record.");
+            }
+        }
+
+        async function deleteAll() {
+            if (!confirm("⚠️ DANGER: This will permanently delete ALL upload history and student records. Continue?")) return;
+            try {
+                const res = await fetch('/history/delete_all', { method: 'DELETE' });
+                const data = await res.json();
+                if (data.success) {
+                    loadHistory();
+                } else {
+                    alert("Error: " + data.error);
+                }
+            } catch (err) {
+                alert("Failed to clear history.");
+            }
+        }
+
+        async function loadDetail(uploadId) {
+            const res = await fetch(`/history/${uploadId}`);
+            const data = await res.json();
+            document.getElementById('history-list').style.display = 'none';
+            document.getElementById('history-detail').style.display = 'block';
+            document.getElementById('hd-safe').textContent = data.upload.safe_count;
+            document.getElementById('hd-atrisk').textContent = data.upload.at_risk_count;
+            document.getElementById('hd-patterns').innerHTML = data.patterns.map(p => `<div class="pattern-item">${p}</div>`).join('');
+            renderTable('hd-at-risk-body', data.at_risk);
+            renderTable('hd-all-body', data.students);
+        }
+
+        function closeDetail() {
+            document.getElementById('history-detail').style.display = 'none';
+            document.getElementById('history-list').style.display = 'block';
+        }
+    </script>
+</body>
+
+</html>
