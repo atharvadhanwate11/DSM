@@ -150,7 +150,7 @@ Open [http://127.0.0.1:5000](http://127.0.0.1:5000)
 
 ## 👨‍💻 Developed By
 
-- **SY IT — Section 9**
+- *SY IT — Section 9*
 
 - **Atharva Dhanwate** (23123)  
 - **Dipanshu Bhat** (23125)  
