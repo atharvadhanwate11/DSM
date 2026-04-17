@@ -148,13 +148,22 @@ Open [http://127.0.0.1:5000](http://127.0.0.1:5000)
 
 ## 👥 Authors
 
-> Developed by **SY IT — Section 9**
-> Atharva Dhanwate(23123)
-> Dipanshu Bhat   (23125)
-> Jesnil Anil Jose(23140)
-> PICT Pune.
-> Part of the **Discrete & Statistical Mathematics (DSM)** Course Project.
-> Academic Year 2025-26.
+## 👨‍💻 Developed By
+
+- **SY IT — Section 9**
+
+- **Atharva Dhanwate** (23123)  
+- **Dipanshu Bhat** (23125)  
+- **Jesnil Anil Jose** (23140)  
+
+📍 PICT Pune  
+
+---
+
+## 📚 Academic Details
+
+- **Course:** Discrete & Statistical Mathematics (DSM)  
+- **Academic Year:** 2025–26
 
 ---
 
