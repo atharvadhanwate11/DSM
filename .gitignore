@@ -1,0 +1,6 @@
+# .gitignore
+model.pkl
+label_encoder.pkl
+database.db
+__pycache__/
+*.pyc
